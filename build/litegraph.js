@@ -139,7 +139,7 @@
                 }
             }
 
-            if (!Object.hasOwnProperty(base_class.prototype, "shape")) {
+            try {
                 Object.defineProperty(base_class.prototype, "shape", {
                     set: function (v) {
                         switch (v) {
@@ -166,8 +166,9 @@
                         return this._shape;
                     },
                     enumerable: true,
+                    configurable: true,
                 });
-            }
+            } catch(e) {}
 
             var prev = this.registered_node_types[type];
             if (prev) console.log("replacing node type: " + type);
@@ -694,14 +695,14 @@
                     return;
                 }
                 window.requestAnimationFrame(on_frame);
-                that.runStep(1, !this.catch_errors);
+                that.runStep(1, !that.catch_errors);
             }
             this.execution_timer_id = -1;
             on_frame();
         } else {
             this.execution_timer_id = setInterval(function () {
                 //execute
-                that.runStep(1, !this.catch_errors);
+                that.runStep(1, !that.catch_errors);
             }, interval);
         }
     };
@@ -10191,7 +10192,7 @@ LGraphNode.prototype.executeAction = function(action)
 
     //API *************************************************
     //like rect but rounded corners
-    if (this.CanvasRenderingContext2D) {
+    if (typeof CanvasRenderingContext2D !== "undefined") {
         CanvasRenderingContext2D.prototype.roundRect = function (
             x,
             y,
@@ -10839,8 +10840,13 @@ LGraphNode.prototype.executeAction = function(action)
                 window.setTimeout(callback, 1000 / 60);
             };
     }
-})(this);
+})(typeof globalThis !== "undefined" ? globalThis : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : this);
 
 if (typeof exports != "undefined") {
-    exports.LiteGraph = this.LiteGraph;
+    var _g = typeof globalThis !== "undefined" ? globalThis : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : this;
+    exports.LiteGraph = _g.LiteGraph;
+    exports.LGraph = _g.LGraph;
+    exports.LGraphNode = _g.LGraphNode;
+    exports.LGraphGroup = _g.LGraphGroup;
+    exports.LGraphCanvas = _g.LGraphCanvas;
 }
